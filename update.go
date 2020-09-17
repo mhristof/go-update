@@ -11,39 +11,35 @@ import (
 func main() {
 }
 
-func Check(url string) (bool, error) {
+func Check(url string) (bool, func() error, error) {
 	latest, err := wget(url)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	latestSha := sha256.Sum256(latest)
 
 	this, err := os.Executable()
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	f, err := os.Open(this)
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 	defer f.Close()
 
 	thisB, err := ioutil.ReadAll(f)
 	thisSha := sha256.Sum256(thisB)
 
-	return thisSha != latestSha, nil
-	// fmt.Println("Updating to new version")
-	// err := ioutil.WriteFile(this, latest, 0755)
-	// if err != nil {
-	// 	log.WithFields(log.Fields{
-	// 		"err":  err,
-	// 		"this": this,
-	// 	}).Panic("Cannot write file")
-	// }
-
-	//}
+	return thisSha != latestSha, func() error {
+		err := ioutil.WriteFile(this, latest, 0755)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, nil
 }
 
 func sha(in []byte) string {
