@@ -1,4 +1,4 @@
-package main
+package update
 
 import (
 	"crypto/sha256"
@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/mhristof/germ/log"
 )
 
 func main() {
@@ -58,11 +56,7 @@ func wget(url string) ([]byte, error) {
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"err": err,
-			"url": url,
-		}).Panic("Cannot download url")
-
+		return nil, err
 	}
 	defer resp.Body.Close()
 
